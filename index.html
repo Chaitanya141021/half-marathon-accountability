@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>14.02 — Half Marathon Accountability</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--ok:#166534;--okbg:#dcfce7;--warn:#92400e;--warnbg:#fef3c7}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:760px;margin:auto;padding:18px 16px 42px}.hero{background:#111827;color:#fff;border-radius:24px;padding:24px;margin-bottom:16px}
+    .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}.hero h1{margin:6px 0 8px;font-size:30px}.hero p{margin:0;color:#d1d5db}
+    .count{font-size:46px;font-weight:800;line-height:1;margin:22px 0 5px}.countlabel{color:#d1d5db;font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+    .card h2{font-size:16px;margin:0 0 12px}.stat{font-size:25px;font-weight:800}.muted{font-size:12px;color:var(--muted)}
+    label{display:block;font-size:13px;font-weight:650;margin:14px 0 7px} input,textarea,select{width:100%;font:inherit;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+    textarea{min-height:76px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{width:100%;border:0;border-radius:13px;padding:13px 15px;font:inherit;font-weight:750;cursor:pointer;background:var(--accent);color:#fff}
+    button.secondary{background:#eef0f4;color:#111827}.person{display:flex;gap:8px}.person button{flex:1}.person button.selected{outline:3px solid #c7d2fe}
+    .check{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}.check:last-child{border-bottom:0}
+    .pill{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}.done{background:var(--okbg);color:var(--ok)}.pending{background:var(--warnbg);color:var(--warn)}
+    .entry{padding:13px 0;border-bottom:1px solid var(--line)}.entry:last-child{border-bottom:0}.entrytop{display:flex;justify-content:space-between;gap:8px}
+    .small{font-size:13px;color:var(--muted);white-space:pre-wrap}.hidden{display:none}.notice{font-size:12px;color:var(--muted);line-height:1.5}
+    @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.hero h1{font-size:26px}.count{font-size:40px}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">14 February 2027 · Half Marathon</div>
+    <h1>Show up. Then run.</h1>
+    <p>A tiny accountability board for two runners.</p>
+    <div class="count" id="days">—</div>
+    <div class="countlabel">days to race day</div>
+  </section>
+
+  <div class="grid">
+    <div class="card"><div class="muted">You</div><div class="stat" id="youStreak">0</div><div class="muted">day streak</div></div>
+    <div class="card"><div class="muted">Sister</div><div class="stat" id="sisStreak">0</div><div class="muted">day streak</div></div>
+  </div>
+
+  <section class="card">
+    <h2>Today's check-in</h2>
+    <div class="person">
+      <button id="youBtn" class="secondary" onclick="selectPerson('you')">I'm You</button>
+      <button id="sisBtn" class="secondary" onclick="selectPerson('sister')">I'm Sister</button>
+    </div>
+    <p class="notice" id="whoNotice">Choose your name before saving today's entry.</p>
+
+    <label>Daily punch-in</label>
+    <button id="punchBtn" onclick="punchIn()">Punch in for today</button>
+
+    <label>How much did you exercise / train today?</label>
+    <input id="training" placeholder="e.g. 5 km run · 45 min strength · rest day" />
+
+    <label>Healthy foods I ate today</label>
+    <textarea id="healthy" placeholder="e.g. dal, eggs, fruit, vegetables, curd..."></textarea>
+
+    <label>Unhealthy foods I ate today</label>
+    <textarea id="unhealthy" placeholder="e.g. pizza, dessert, chips..."></textarea>
+
+    <label>Optional note</label>
+    <textarea id="note" placeholder="How did the day feel?"></textarea>
+
+    <button onclick="saveEntry()">Save today's accountability entry</button>
+    <p class="notice" id="status"></p>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Today</h2>
+    <div id="today"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Recent days</h2>
+    <div id="history"><p class="notice">Loading…</p></div>
+  </section>
+
+  <p class="notice" style="margin:18px 4px">
+    Private family challenge. This version uses Firebase for shared data. Do not enter sensitive medical or financial information.
+  </p>
+</div>
+
+<script type="module">
+  // Firebase Web App configuration for Run Pigeon Run.
+  const firebaseConfig = {
+    apiKey: "AIzaSyAV5vKTVZeTYPDG8gm5c1SS6OJgwwBQNSc",
+    authDomain: "run-pigeon-run-f2e0d.firebaseapp.com",
+    projectId: "run-pigeon-run-f2e0d",
+    storageBucket: "run-pigeon-run-f2e0d.firebasestorage.app",
+    messagingSenderId: "786177227667",
+    appId: "1:786177227667:web:f73eb8c91faca24f914666",
+    measurementId: "G-9DSZQ71XL3"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const challengeId = "feb14-half-marathon-2027";
+
+  let currentPerson = localStorage.getItem("hm_person") || "";
+  let user = null;
+
+  const $ = id => document.getElementById(id);
+  const todayKey = () => new Date().toLocaleDateString("en-CA", {timeZone:"Asia/Kolkata"});
+
+  function countdown(){
+    const race = new Date("2027-02-14T00:00:00+05:30");
+    const now = new Date();
+    const d = Math.max(0, Math.ceil((race-now)/86400000));
+    $("days").textContent = d;
+  }
+  countdown();
+
+  window.selectPerson = function(person){
+    currentPerson = person;
+    localStorage.setItem("hm_person", person);
+    $("youBtn").classList.toggle("selected", person==="you");
+    $("sisBtn").classList.toggle("selected", person==="sister");
+    $("whoNotice").textContent = `Selected: ${person==="you" ? "You" : "Sister"}`;
+    refresh();
+  };
+
+  async function boot(){
+    try{
+      const cred = await signInAnonymously(auth);
+      user = cred.user;
+      if(currentPerson) selectPerson(currentPerson);
+      await refresh();
+    }catch(e){
+      $("status").textContent = "Firebase setup is not complete yet. Follow README.md.";
+      console.error(e);
+    }
+  }
+
+  async function punchIn(){
+    if(!currentPerson) return alert("Choose your name first.");
+    const ref = doc(db,"challenges",challengeId,"entries",`${todayKey()}_${currentPerson}`);
+    await setDoc(ref,{date:todayKey(),person:currentPerson,punchedInAt:serverTimestamp(),punchedIn:true},{merge:true});
+    $("punchBtn").textContent = "✓ Punched in today";
+    $("punchBtn").disabled = true;
+    await refresh();
+  }
+
+  window.punchIn = punchIn;
+
+  window.saveEntry = async function(){
+    if(!currentPerson) return alert("Choose your name first.");
+    $("status").textContent = "Saving…";
+    try{
+      const ref = doc(db,"challenges",challengeId,"entries",`${todayKey()}_${currentPerson}`);
+      await setDoc(ref,{
+        date:todayKey(),person:currentPerson,
+        training:$("training").value.trim(),
+        healthy:$("healthy").value.trim(),
+        unhealthy:$("unhealthy").value.trim(),
+        note:$("note").value.trim(),
+        punchedIn:true, updatedAt:serverTimestamp()
+      },{merge:true});
+      $("status").textContent = "Saved ✓";
+      await refresh();
+    }catch(e){
+      $("status").textContent = "Could not save. Check Firebase setup/rules.";
+      console.error(e);
+    }
+  };
+
+  async function getEntries(){
+    const q = query(collection(db,"challenges",challengeId,"entries"),orderBy("date","desc"),limit(120));
+    const snap = await getDocs(q);
+    return snap.docs.map(d=>d.data());
+  }
+
+  function personName(p){return p==="sister"?"Sister":"You"}
+
+  function renderToday(entries){
+    const today = todayKey();
+    const rows = entries.filter(e=>e.date===today);
+    $("today").innerHTML = ["you","sister"].map(p=>{
+      const e = rows.find(x=>x.person===p);
+      if(!e) return `<div class="check"><span>${personName(p)}</span><span class="pill pending">Not checked in</span></div>`;
+      return `<div class="entry">
+        <div class="entrytop"><strong>${personName(p)}</strong><span class="pill done">Checked in</span></div>
+        <div class="small">${e.training || "No training entered."}</div>
+        ${e.healthy?`<div class="small">🥗 ${e.healthy}</div>`:""}
+        ${e.unhealthy?`<div class="small">🍕 ${e.unhealthy}</div>`:""}
+      </div>`;
+    }).join("");
+  }
+
+  function streak(entries,person){
+    const dates = new Set(entries.filter(e=>e.person===person && e.punchedIn).map(e=>e.date));
+    let d = new Date();
+    let s = 0;
+    while(true){
+      const key = d.toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"});
+      if(!dates.has(key)) break;
+      s++; d.setDate(d.getDate()-1);
+    }
+    return s;
+  }
+
+  function renderHistory(entries){
+    const days = [...new Set(entries.map(e=>e.date))].sort().reverse().slice(0,14);
+    if(!days.length){$("history").innerHTML='<p class="notice">No entries yet.</p>';return}
+    $("history").innerHTML = days.map(day=>{
+      const es=entries.filter(e=>e.date===day);
+      return `<div class="entry"><div class="entrytop"><strong>${new Date(day+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</strong><span>${es.filter(e=>e.punchedIn).length}/2 checked in</span></div>
+      ${es.map(e=>`<div class="small"><b>${personName(e.person)}:</b> ${e.training||"—"}</div>`).join("")}</div>`;
+    }).join("");
+  }
+
+  async function refresh(){
+    if(!user) return;
+    try{
+      const entries=await getEntries();
+      renderToday(entries); renderHistory(entries);
+      $("youStreak").textContent=streak(entries,"you");
+      $("sisStreak").textContent=streak(entries,"sister");
+      const mine=entries.find(e=>e.date===todayKey()&&e.person===currentPerson);
+      if(mine){
+        $("punchBtn").textContent="✓ Punched in today";
+        $("punchBtn").disabled=true;
+        if(mine.training) $("training").value=mine.training;
+        if(mine.healthy) $("healthy").value=mine.healthy;
+        if(mine.unhealthy) $("unhealthy").value=mine.unhealthy;
+        if(mine.note) $("note").value=mine.note;
+      }
+    }catch(e){console.error(e)}
+  }
+
+  boot();
+</script>
+</body>
+</html>
