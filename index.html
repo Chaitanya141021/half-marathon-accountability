@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Run Pigeon Run! — Half Marathon</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--ok:#166534;--okbg:#dcfce7;--warn:#92400e;--warnbg:#fef3c7;--bad:#991b1b;--badbg:#fee2e2}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:760px;margin:auto;padding:18px 16px 42px}.hero{background:#111827;color:#fff;border-radius:24px;padding:24px;margin-bottom:16px}
+    .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}.hero h1{margin:6px 0 8px;font-size:30px}.hero p{margin:0;color:#d1d5db}
+    .countline{font-size:20px;font-weight:800;margin-top:22px}.countline span{font-variant-numeric:tabular-nums}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+    .card h2{font-size:18px;margin:0 0 12px}.stat{font-size:25px;font-weight:800}.muted{font-size:12px;color:var(--muted)}
+    label{display:block;font-size:13px;font-weight:650;margin:14px 0 7px} input,textarea,select{width:100%;font:inherit;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+    textarea{min-height:76px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{width:100%;border:0;border-radius:13px;padding:13px 15px;font:inherit;font-weight:750;cursor:pointer;background:var(--accent);color:#fff}
+    button.secondary{background:#eef0f4;color:#111827}.person{display:flex;gap:8px}.person button{flex:1}.person button.selected{outline:3px solid #c7d2fe}
+    button.breakbtn{background:#fef3c7;color:#92400e;margin-top:10px}button:disabled{opacity:.55;cursor:not-allowed}
+    .check{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}.check:last-child{border-bottom:0}
+    .pill{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}.done{background:var(--okbg);color:var(--ok)}.pending{background:var(--warnbg);color:var(--warn)}.lost{background:var(--badbg);color:var(--bad)}
+    .entry{padding:13px 0;border-bottom:1px solid var(--line)}.entry:last-child{border-bottom:0}.entrytop{display:flex;justify-content:space-between;gap:8px}
+    .small{font-size:13px;color:var(--muted);white-space:pre-wrap}.hidden{display:none}.notice{font-size:12px;color:var(--muted);line-height:1.5}
+    .counter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.counter{border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}.counter .num{font-size:24px;font-weight:800}.counter .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+    .calendar-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}.calendar{display:grid;grid-template-columns:repeat(7,minmax(42px,1fr));gap:5px;min-width:320px}.dow{font-size:10px;color:var(--muted);text-align:center;font-weight:700;padding:3px 0}.month-title{font-size:15px;font-weight:800;margin:18px 0 8px}.day{min-height:45px;border:1px solid var(--line);border-radius:9px;background:#fafafa;padding:4px;display:flex;flex-direction:column;justify-content:space-between}.day.future{background:#fff;color:#d1d5db}.daynum{font-size:10px;color:var(--muted);text-align:right;line-height:1}.personmark{display:flex;justify-content:center;gap:4px;margin-top:4px}.mark{width:17px;height:17px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}.mark.active{background:var(--okbg);color:var(--ok)}.mark.break{background:var(--warnbg);color:var(--warn)}.mark.lost{background:var(--badbg);color:var(--bad)}.mark.future{background:#f3f4f6;color:#d1d5db}.mark.empty{background:#f3f4f6;color:#9ca3af}.legend{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 4px}.legend span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}.legend .mark{width:18px;height:18px}
+    .person-labels{display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--muted)}.person-labels b{color:var(--text)}
+    @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.hero h1{font-size:26px}.countline{font-size:18px}.row{grid-template-columns:1fr}.counter-grid{gap:6px}.counter{padding:10px 6px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">14 February 2027 · Half Marathon</div>
+    <h1>Run Pigeon Run! 🕊️</h1>
+    <p>A tiny accountability board for Chaitanya &amp; Chinmayee.</p>
+    <div class="countline">Days till Showdown - <span id="days">—</span></div>
+  </section>
+
+  <div class="grid">
+    <div class="card"><div class="muted">Chaitanya</div><div class="stat" id="youStreak">0</div><div class="muted">active day streak</div></div>
+    <div class="card"><div class="muted">Chinmayee</div><div class="stat" id="sisStreak">0</div><div class="muted">active day streak</div></div>
+  </div>
+
+  <section class="card">
+    <h2>Today's check-in</h2>
+    <div class="person">
+      <button id="youBtn" class="secondary" onclick="selectPerson('you')">Chaitanya check-in</button>
+      <button id="sisBtn" class="secondary" onclick="selectPerson('sister')">Chinmayee check-in</button>
+    </div>
+    <p class="notice" id="whoNotice">Choose your name before saving today's entry.</p>
+
+    <label>Daily punch-in</label>
+    <button id="punchBtn" onclick="punchIn()">Punch in for today</button>
+
+    <label>How much did you exercise / train today? <span aria-hidden="true">*</span></label>
+    <input id="training" placeholder="e.g. 5 km run · 45 min strength" required />
+
+    <label>Healthy foods I ate today <span aria-hidden="true">*</span></label>
+    <textarea id="healthy" placeholder="e.g. dal, eggs, fruit, vegetables, curd..." required></textarea>
+
+    <label>Unhealthy foods I ate today <span class="muted">(optional if none)</span></label>
+    <textarea id="unhealthy" placeholder="e.g. pizza, dessert, chips... or type &quot;None&quot;"></textarea>
+
+    <label>Optional note</label>
+    <textarea id="note" placeholder="How did the day feel?"></textarea>
+
+    <button onclick="saveEntry()">Save today's accountability entry</button>
+    <button id="breakBtn" class="breakbtn" onclick="takeBreak()">🕊️ Mark today as a break day</button>
+    <p class="notice" id="status"></p>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Days counter</h2>
+    <p class="notice">Active = accountability entry · Break = planned day off · Lost = no entry or break on an elapsed day.</p>
+    <div class="muted" style="margin:8px 0 5px">Chaitanya</div>
+    <div class="counter-grid">
+      <div class="counter"><div class="num" id="youActive">0</div><div class="lbl">Active days</div></div>
+      <div class="counter"><div class="num" id="youBreak">0</div><div class="lbl">Break days</div></div>
+      <div class="counter"><div class="num" id="youLost">0</div><div class="lbl">Lost days</div></div>
+    </div>
+    <div class="muted" style="margin:14px 0 5px">Chinmayee</div>
+    <div class="counter-grid">
+      <div class="counter"><div class="num" id="sisActive">0</div><div class="lbl">Active days</div></div>
+      <div class="counter"><div class="num" id="sisBreak">0</div><div class="lbl">Break days</div></div>
+      <div class="counter"><div class="num" id="sisLost">0</div><div class="lbl">Lost days</div></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Daily calendar</h2>
+    <p class="notice">Each day shows Chaitanya first and Chinmayee second. Future days stay blank. A red ✕ marks an elapsed day with no entry.</p>
+    <div class="legend">
+      <span><i class="mark active">✓</i> Active</span>
+      <span><i class="mark break">🕊</i> Break</span>
+      <span><i class="mark lost">×</i> Lost</span>
+      <span><i class="mark future">·</i> Future</span>
+    </div>
+    <div class="person-labels"><span><b>C</b> = Chaitanya</span><span><b>Ch</b> = Chinmayee</span></div>
+    <div id="calendar"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Today</h2>
+    <div id="today"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Recent days</h2>
+    <div id="history"><p class="notice">Loading…</p></div>
+  </section>
+
+  <p class="notice" style="margin:18px 4px">
+    Shared challenge. This version uses Firebase for shared data. Do not enter sensitive medical or financial information.
+  </p>
+</div>
+
+<script type="module">
+  const firebaseConfig = {
+    apiKey: "AIzaSyAV5vKTVZeTYPDG8gm5c1SS6OJgwwBQNSc",
+    authDomain: "run-pigeon-run-f2e0d.firebaseapp.com",
+    projectId: "run-pigeon-run-f2e0d",
+    storageBucket: "run-pigeon-run-f2e0d.firebasestorage.app",
+    messagingSenderId: "786177227667",
+    appId: "1:786177227667:web:f73eb8c91faca24f914666",
+    measurementId: "G-9DSZQ71XL3"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import { getFirestore, collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const challengeId = "feb14-half-marathon-2027";
+  const challengeStart = "2026-09-30";
+  const raceDate = "2027-02-14";
+
+  let currentPerson = localStorage.getItem("hm_person") || "";
+  let user = null;
+  const $ = id => document.getElementById(id);
+  const todayKey = () => new Date().toLocaleDateString("en-CA", {timeZone:"Asia/Kolkata"});
+  const personName = p => p === "sister" ? "Chinmayee" : "Chaitanya";
+  const personShort = p => p === "sister" ? "Ch" : "C";
+
+  function countdown(){
+    const race = new Date("2027-02-14T00:00:00+05:30");
+    const now = new Date();
+    const d = Math.max(0, Math.ceil((race-now)/86400000));
+    $("days").textContent = d;
+  }
+  countdown();
+  setInterval(countdown, 60000);
+
+  window.selectPerson = function(person){
+    currentPerson = person;
+    localStorage.setItem("hm_person", person);
+    $("youBtn").classList.toggle("selected", person === "you");
+    $("sisBtn").classList.toggle("selected", person === "sister");
+    $("whoNotice").textContent = `Selected: ${personName(person)}`;
+    refresh();
+  };
+
+  function resetForm(){
+    ["training","healthy","unhealthy","note"].forEach(id => $(id).value = "");
+    $("punchBtn").textContent = "Punch in for today";
+    $("punchBtn").disabled = false;
+    $("breakBtn").disabled = false;
+  }
+
+  async function boot(){
+    try{
+      const cred = await signInAnonymously(auth);
+      user = cred.user;
+      if(currentPerson) selectPerson(currentPerson);
+      await refresh();
+    }catch(e){
+      $("status").textContent = "Firebase setup is not complete yet. Follow README.md.";
+      console.error(e);
+    }
+  }
+
+  function getFormValues(){
+    return {
+      training: $("training").value.trim(),
+      healthy: $("healthy").value.trim(),
+      unhealthy: $("unhealthy").value.trim(),
+      note: $("note").value.trim()
+    };
+  }
+
+  function validateEntry(v){
+    if(!v.training){ $("training").focus(); alert("Please enter what exercise / training you did today."); return false; }
+    if(!v.healthy && !v.unhealthy){ $("healthy").focus(); alert('Please enter what healthy food or unhealthy food you ate today. If you ate neither, type "None".'); return false; }
+    return true;
+  }
+
+  async function punchIn(){
+    if(!currentPerson) return alert("Choose your name first.");
+    const v = getFormValues();
+    if(!validateEntry(v)) return;
+    try{
+      const ref = doc(db,"challenges",challengeId,"entries",`${todayKey()}_${currentPerson}`);
+      await setDoc(ref,{date:todayKey(),person:currentPerson,training:v.training,healthy:v.healthy,unhealthy:v.unhealthy,note:v.note,punchedIn:true,breakDay:false,punchedInAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
+      $("punchBtn").textContent = "✓ Punched in today";
+      $("punchBtn").disabled = true;
+      $("breakBtn").disabled = true;
+      $("status").textContent = "Punched in and saved ✓";
+      await refresh();
+    }catch(e){
+      $("status").textContent = "Could not save. Check Firebase setup/rules.";
+      console.error(e);
+    }
+  }
+  window.punchIn = punchIn;
+
+  window.saveEntry = async function(){
+    if(!currentPerson) return alert("Choose your name first.");
+    const v = getFormValues();
+    if(!validateEntry(v)) return;
+    $("status").textContent = "Saving…";
+    try{
+      const ref = doc(db,"challenges",challengeId,"entries",`${todayKey()}_${currentPerson}`);
+      await setDoc(ref,{date:todayKey(),person:currentPerson,training:v.training,healthy:v.healthy,unhealthy:v.unhealthy,note:v.note,punchedIn:true,breakDay:false,updatedAt:serverTimestamp()},{merge:true});
+      $("status").textContent = "Saved ✓";
+      await refresh();
+    }catch(e){
+      $("status").textContent = "Could not save. Check Firebase setup/rules.";
+      console.error(e);
+    }
+  };
+
+  window.takeBreak = async function(){
+    if(!currentPerson) return alert("Choose your name first.");
+    const existing = await getTodayEntry(currentPerson);
+    if(existing?.punchedIn && !existing?.breakDay) return alert("You have already checked in today. A break cannot replace an active entry.");
+    if(!confirm(`Mark today as a break day for ${personName(currentPerson)}?`)) return;
+    $("status").textContent = "Saving break day…";
+    try{
+      const ref = doc(db,"challenges",challengeId,"entries",`${todayKey()}_${currentPerson}`);
+      await setDoc(ref,{date:todayKey(),person:currentPerson,training:"",healthy:"",unhealthy:"",note:"Break day",punchedIn:false,breakDay:true,updatedAt:serverTimestamp()},{merge:true});
+      $("status").textContent = "Break day saved 🕊️";
+      await refresh();
+    }catch(e){
+      $("status").textContent = "Could not save break day. Check Firebase setup/rules.";
+      console.error(e);
+    }
+  };
+
+  async function getTodayEntry(person){
+    const ref = doc(db,"challenges",challengeId,"entries",`${todayKey()}_${person}`);
+    const snap = await getDocs(query(collection(db,"challenges",challengeId,"entries"), orderBy("date","desc"), limit(400)));
+    const found = snap.docs.map(d=>d.data()).find(e=>e.date===todayKey()&&e.person===person);
+    return found || null;
+  }
+
+  async function getEntries(){
+    const q = query(collection(db,"challenges",challengeId,"entries"),orderBy("date","desc"),limit(400));
+    const snap = await getDocs(q);
+    return snap.docs.map(d=>d.data());
+  }
+
+  function statusFor(entries, person, date){
+    const e = entries.find(x=>x.date===date && x.person===person);
+    if(e?.breakDay) return "break";
+    if(e?.punchedIn) return "active";
+    if(date <= todayKey() && date >= challengeStart) return "lost";
+    return "future";
+  }
+
+  function renderToday(entries){
+    const today = todayKey();
+    const rows = entries.filter(e=>e.date===today);
+    $("today").innerHTML = ["you","sister"].map(p=>{
+      const e = rows.find(x=>x.person===p);
+      if(!e) return `<div class="check"><span>${personName(p)}</span><span class="pill pending">Not checked in</span></div>`;
+      if(e.breakDay) return `<div class="entry"><div class="entrytop"><strong>${personName(p)}</strong><span class="pill pending">🕊️ Break day</span></div><div class="small">Planned day off.</div></div>`;
+      return `<div class="entry"><div class="entrytop"><strong>${personName(p)}</strong><span class="pill done">Checked in</span></div><div class="small">${escapeHtml(e.training || "No training entered.")}</div>${e.healthy?`<div class="small">🥗 ${escapeHtml(e.healthy)}</div>`:""}${e.unhealthy?`<div class="small">🍕 ${escapeHtml(e.unhealthy)}</div>`:""}</div>`;
+    }).join("");
+  }
+
+  function streak(entries,person){
+    const dates = new Set(entries.filter(e=>e.person===person && e.punchedIn && !e.breakDay).map(e=>e.date));
+    let d = new Date(); let s = 0;
+    while(true){
+      const key = d.toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"});
+      if(!dates.has(key)) break;
+      s++; d.setDate(d.getDate()-1);
+    }
+    return s;
+  }
+
+  function counters(entries,person){
+    let active=0, breaks=0, lost=0;
+    const start = new Date(challengeStart+"T00:00:00+05:30");
+    const end = new Date(todayKey()+"T00:00:00+05:30");
+    for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+      const date=d.toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"});
+      const s=statusFor(entries,person,date);
+      if(s==="active") active++; else if(s==="break") breaks++; else if(s==="lost") lost++;
+    }
+    return {active,breaks,lost};
+  }
+
+  function renderCounters(entries){
+    const a=counters(entries,"you"), b=counters(entries,"sister");
+    $("youActive").textContent=a.active; $("youBreak").textContent=a.breaks; $("youLost").textContent=a.lost;
+    $("sisActive").textContent=b.active; $("sisBreak").textContent=b.breaks; $("sisLost").textContent=b.lost;
+  }
+
+  function dateLabel(date){return new Date(date+"T00:00:00+05:30").toLocaleDateString("en-IN",{day:"numeric",month:"short"});}
+
+  function renderCalendar(entries){
+    const start = new Date("2026-09-01T00:00:00+05:30");
+    const end = new Date("2027-02-28T00:00:00+05:30");
+    const months=[];
+    for(let d=new Date(start.getFullYear(),start.getMonth(),1); d<=end; d.setMonth(d.getMonth()+1)) months.push(new Date(d));
+    $("calendar").innerHTML = months.map(month=>{
+      const year=month.getFullYear(), m=month.getMonth();
+      const first=new Date(year,m,1);
+      const daysInMonth=new Date(year,m+1,0).getDate();
+      const mondayIndex=(first.getDay()+6)%7;
+      let cells="";
+      for(let i=0;i<mondayIndex;i++) cells+='<div></div>';
+      for(let day=1;day<=daysInMonth;day++){
+        const date=`${year}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+        const c=statusFor(entries,"you",date), s=statusFor(entries,"sister",date);
+        cells += `<div class="day ${c==='future'&&s==='future'?'future':''}"><div class="daynum">${day}</div><div class="personmark"><span class="mark ${c}">${c==='active'?'✓':c==='break'?'🕊':c==='lost'?'×':'·'}</span><span class="mark ${s}">${s==='active'?'✓':s==='break'?'🕊':s==='lost'?'×':'·'}</span></div></div>`;
+      }
+      return `<div class="month-title">${month.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}</div><div class="calendar"><div class="dow">M</div><div class="dow">T</div><div class="dow">W</div><div class="dow">T</div><div class="dow">F</div><div class="dow">S</div><div class="dow">S</div>${cells}</div>`;
+    }).join("");
+  }
+
+  function renderHistory(entries){
+    const days = [...new Set(entries.map(e=>e.date))].sort().reverse().slice(0,14);
+    if(!days.length){$("history").innerHTML='<p class="notice">No entries yet.</p>';return}
+    $("history").innerHTML = days.map(day=>{
+      const es=entries.filter(e=>e.date===day);
+      return `<div class="entry"><div class="entrytop"><strong>${dateLabel(day)}</strong><span>${es.filter(e=>e.punchedIn).length}/2 active</span></div>${es.map(e=>e.breakDay?`<div class="small"><b>${personName(e.person)}:</b> 🕊️ Break day</div>`:`<div class="small"><b>${personName(e.person)}:</b> ${escapeHtml(e.training||"—")}</div>`).join("")}</div>`;
+    }).join("");
+  }
+
+  function escapeHtml(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+  async function refresh(){
+    if(!user) return;
+    try{
+      const entries=await getEntries();
+      renderToday(entries); renderHistory(entries); renderCounters(entries); renderCalendar(entries);
+      $("youStreak").textContent=streak(entries,"you");
+      $("sisStreak").textContent=streak(entries,"sister");
+      const mine=entries.find(e=>e.date===todayKey()&&e.person===currentPerson);
+      if(mine?.breakDay){
+        $("punchBtn").textContent="Break day selected 🕊️"; $("punchBtn").disabled=true; $("breakBtn").disabled=true;
+      } else if(mine?.punchedIn){
+        $("punchBtn").textContent="✓ Punched in today"; $("punchBtn").disabled=true; $("breakBtn").disabled=true;
+        if(mine.training) $("training").value=mine.training;
+        if(mine.healthy) $("healthy").value=mine.healthy;
+        if(mine.unhealthy) $("unhealthy").value=mine.unhealthy;
+        if(mine.note) $("note").value=mine.note;
+      } else {
+        $("punchBtn").disabled=false; $("breakBtn").disabled=false;
+      }
+    }catch(e){console.error(e)}
+  }
+
+  boot();
+</script>
+</body>
+</html>
